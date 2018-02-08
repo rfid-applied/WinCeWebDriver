@@ -40,9 +40,8 @@ namespace SimpleWebDriver.Tests
             var checkboxes = wd.GetElements("css selector", "input[type=\"checkbox\"]").ToList();
             Assertions.Equal(2, checkboxes.Count);
 
-            // FIXME!
             var check = wd.GetElement("css selector", "input[checked=\"false\"]");
-            Assertions.Equal(checkboxes[0], check);
+            Assertions.Equal(checkboxes[1], check);
         }
 
         public static void TestGetSecondTextBox(string endpoint)
@@ -54,12 +53,12 @@ namespace SimpleWebDriver.Tests
             Assertions.Equal(true, element != null);
         }
 
-        public static void TestGetComboboxAfterCheckbox(string endpoint)
+        public static void TestCheckboxAfterButton(string endpoint)
         {
             var wd = new WebDriver(endpoint);
             wd.Session(SUT, null);
 
-            var element = wd.GetElement("css selector", "input[type=\"checkbox\"] ~ input[type=\"combobox\"]");
+            var element = wd.GetElement("css selector", "button ~ input[type=\"checkbox\"]");
             Assertions.Equal(true, element != null);
         }
 

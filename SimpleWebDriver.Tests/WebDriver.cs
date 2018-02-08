@@ -21,7 +21,7 @@ namespace SimpleWebDriver.Tests
             get { return _sessionId; }
         }
 
-        T CallApi<T>(Func<T> call)
+        T CallApi<T>(Func<T> call, Func<string,T> error)
         {
             try
             {
@@ -50,7 +50,12 @@ namespace SimpleWebDriver.Tests
                         {
                             json = sr.ReadToEnd().Trim();
                         }
-                        throw new Exception("Server returned: \r\n" + json);
+                        if (error != null)
+                        {
+                            return error(json);
+                        }
+                        else
+                            throw new Exception("Server returned: \r\n" + json);
 
                     default:
                         throw ex;
@@ -74,7 +79,7 @@ namespace SimpleWebDriver.Tests
                 using (var res = SimpleWebClient.PostJson(_endpoint + "session", obj)) {
                     return 0;
                 }
-            });
+            }, null);
         }
 
         public void SessionDrop()
@@ -85,7 +90,7 @@ namespace SimpleWebDriver.Tests
                 {
                     return res;
                 }
-            });
+            }, null);
         }
 
         public JObject GetSessionCommand(string command)
@@ -103,7 +108,7 @@ namespace SimpleWebDriver.Tests
                     var obj = JObject.Parse(json);
                     return obj;
                 }
-            });
+            }, (json) => JObject.Parse(json));
         }
 
         public JObject PostSessionCommand(string command, object payload)
@@ -121,7 +126,25 @@ namespace SimpleWebDriver.Tests
                     var obj = JObject.Parse(json);
                     return obj;
                 }
-            });
+            }, null);
+        }
+
+        public JObject PostFaultySessionCommand(string command, object payload)
+        {
+            return CallApi(() =>
+            {
+                using (var resp = SimpleWebClient.PostJson(_endpoint + "session/" + _sessionId + "/" + command, payload))
+                {
+                    string json;
+                    using (System.IO.StreamReader sr =
+                          new System.IO.StreamReader(resp.GetResponseStream()))
+                    {
+                        json = sr.ReadToEnd().Trim();
+                    }
+                    var obj = JObject.Parse(json);
+                    return obj;
+                }
+            }, (json) => JObject.Parse(json));
         }
 
         public string GetElement(string @using, string value)
@@ -158,6 +181,14 @@ namespace SimpleWebDriver.Tests
         public void Click(string handle)
         {
             PostSessionCommand("element/" + handle + "/click", new object());
+        }
+
+        public JToken ElementState(string handle, string req)
+        {
+            var obj = GetSessionCommand("element/" + handle + "/" + req);
+            Assertions.Equal("success", obj.Value<string>("status"));
+            var x = obj["value"];
+            return x;
         }
 
         public void SendKeys(string handle, string p)

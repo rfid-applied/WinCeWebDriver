@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
 namespace SimpleWebDriver.Tests
 {
@@ -43,9 +44,9 @@ namespace SimpleWebDriver.Tests
 
             var Bouton1 = wd.GetElement("link text", "Bouton1");
 
-            wd.Click(Bouton1);
-            // not interactable!
-            throw new NotImplementedException();
+            // should fail with an error here!
+            var res = wd.PostFaultySessionCommand("element/" + Bouton1 + "/click", new object());
+            Assertions.Equal("element not interactable", res["value"].Value<string>("error"));
         }
 
         public static void TestSelectItem(string endpoint)
@@ -70,13 +71,19 @@ namespace SimpleWebDriver.Tests
         public static void TestRadioBox(string endpoint)
         {
             var wd = new WebDriver(endpoint);
-            var cb1 = wd.GetElement("link text", "Second Radio");
-            Assertions.Equal(true, cb1 != null);
+            var rb1 = wd.GetElement("link text", "First Radio");
+            Assertions.Equal(true, rb1 != null);
 
-            wd.Click(cb1);
-            // FIXME: how to check that second radio got activated?
-            // need to support query like input[type="checkbox"][checked] (i.e. two assertions about the element)
-            throw new NotImplementedException();
+            var rb2 = wd.GetElement("link text", "Second Radio");
+            Assertions.Equal(true, rb2 != null);
+
+            wd.Click(rb2);
+
+            var r1 = wd.ElementState(rb1, "selected");
+            Assertions.Equal(false, r1.Value<bool>());
+
+            var r2 = wd.ElementState(rb2, "selected");
+            Assertions.Equal(true, r2.Value<bool>());
         }
 
         public static void TestTextEntry(string endpoint)

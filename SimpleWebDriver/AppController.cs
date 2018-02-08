@@ -14,7 +14,6 @@ namespace SimpleWebDriver
     public class AppController : BaseController
     {
         static Session _session = null;
-        //static List<PublishedResource> _resources = new List<PublishedResource>();
 
         [Route(HttpMethod.GET, "/status")]
         public void Status(HttpRequest req, HttpResponse res)
@@ -52,6 +51,12 @@ namespace SimpleWebDriver
             };
             try
             {
+                if (_session != null)
+                {
+                    _sessionApp.Kill();
+                    _sessionApp = null;
+                    _session = null;
+                }
                 var killed = ProcessCE.ProcessCE.FindAndKill(sess.Capabilities.app);
 
                 _sessionApp = SimpleWinceGuiAutomation.WinceApplicationFactory.StartFromPath(sess.Capabilities.app, sess.Capabilities.args);
@@ -319,38 +324,6 @@ namespace SimpleWebDriver
             }
         }
 
-        [Route(HttpMethod.GET, "/session/{sessionId}/element/{elementId}/text")]
-        public void GetElementText(HttpRequest req, HttpResponse res)
-        {
-            if (!req.UrlParameters.ContainsKey("sessionId") ||
-                _session == null ||
-                req.UrlParameters["sessionId"] != _session.SessionId ||
-                !req.UrlParameters.ContainsKey("elementId") ||
-                string.IsNullOrEmpty(req.UrlParameters["elementId"]))
-            {
-                res.SendErrorJson(StatusCode.BadRequest, new ErrorResponse(new Exception("invalid argument")));
-                return;
-            }
-
-            var elementId = req.UrlParameters["elementId"];
-
-            try
-            {
-                var elem = _sessionApp.CurrentWindow.ElementByHandle(elementId);
-                if (elem == null)
-                {
-                    res.SendErrorJson(StatusCode.NotFound, new ErrorResponse(new Exception("stale element reference")));
-                    return;
-                }
-                var text = SessionUtility.GetElementText(elem);
-                res.SendJson(new JsonResponse<string>(_session.SessionId, "success", text));
-            }
-            catch (Exception e)
-            {
-                res.SendErrorJson(StatusCode.InternalServerError, new ErrorResponse(e));
-            }
-        }
-
         [Route(HttpMethod.GET, "/session/{sessionId}/element/{elementId}/rect")]
         public void GetElementRect(HttpRequest req, HttpResponse res)
         {
@@ -424,6 +397,114 @@ namespace SimpleWebDriver
             }
         }
 
+        [Route(HttpMethod.GET, "/session/{sessionId}/element/{elementId}/selected")]
+        public void GetElementSelected(HttpRequest req, HttpResponse res)
+        {
+            if (!req.UrlParameters.ContainsKey("sessionId") ||
+                _session == null ||
+                req.UrlParameters["sessionId"] != _session.SessionId ||
+                !req.UrlParameters.ContainsKey("elementId") ||
+                string.IsNullOrEmpty(req.UrlParameters["elementId"]))
+            {
+                res.SendErrorJson(StatusCode.BadRequest, new ErrorResponse(new Exception("invalid argument")));
+                return;
+            }
+
+            var elementId = req.UrlParameters["elementId"];
+
+            try
+            {
+                var elem = _sessionApp.CurrentWindow.ElementByHandle(elementId);
+                if (elem == null)
+                {
+                    res.SendErrorJson(StatusCode.NotFound, new ErrorResponse(new Exception("stale element reference")));
+                    return;
+                }
+                var val = false;
+                if (elem is SimpleWinceGuiAutomation.Components.WinceCheckBox)
+                {
+                    val = ((SimpleWinceGuiAutomation.Components.WinceCheckBox)elem).Checked;
+                }
+                else if (elem is SimpleWinceGuiAutomation.Components.WinceRadio)
+                {
+                    val = ((SimpleWinceGuiAutomation.Components.WinceRadio)elem).Checked;
+                }
+                // TODO: if an <option>, see if it's checked
+
+                res.SendJson(new JsonResponse<bool>(_session.SessionId, "success", val));
+            }
+            catch (Exception e)
+            {
+                res.SendErrorJson(StatusCode.InternalServerError, new ErrorResponse(e));
+            }
+        }
+
+        [Route(HttpMethod.GET, "/session/{sessionId}/element/{elementId}/text")]
+        public void GetElementText(HttpRequest req, HttpResponse res)
+        {
+            if (!req.UrlParameters.ContainsKey("sessionId") ||
+                _session == null ||
+                req.UrlParameters["sessionId"] != _session.SessionId ||
+                !req.UrlParameters.ContainsKey("elementId") ||
+                string.IsNullOrEmpty(req.UrlParameters["elementId"]))
+            {
+                res.SendErrorJson(StatusCode.BadRequest, new ErrorResponse(new Exception("invalid argument")));
+                return;
+            }
+
+            var elementId = req.UrlParameters["elementId"];
+
+            try
+            {
+                var elem = _sessionApp.CurrentWindow.ElementByHandle(elementId);
+                if (elem == null)
+                {
+                    res.SendErrorJson(StatusCode.NotFound, new ErrorResponse(new Exception("stale element reference")));
+                    return;
+                }
+                var val = SessionUtility.GetElementText(elem);
+
+                res.SendJson(new JsonResponse<string>(_session.SessionId, "success", val));
+            }
+            catch (Exception e)
+            {
+                res.SendErrorJson(StatusCode.InternalServerError, new ErrorResponse(e));
+            }
+        }
+
+        [Route(HttpMethod.GET, "/session/{sessionId}/element/{elementId}/name")]
+        public void GetElementTagName(HttpRequest req, HttpResponse res)
+        {
+            if (!req.UrlParameters.ContainsKey("sessionId") ||
+                _session == null ||
+                req.UrlParameters["sessionId"] != _session.SessionId ||
+                !req.UrlParameters.ContainsKey("elementId") ||
+                string.IsNullOrEmpty(req.UrlParameters["elementId"]))
+            {
+                res.SendErrorJson(StatusCode.BadRequest, new ErrorResponse(new Exception("invalid argument")));
+                return;
+            }
+
+            var elementId = req.UrlParameters["elementId"];
+
+            try
+            {
+                var elem = _sessionApp.CurrentWindow.ElementByHandle(elementId);
+                if (elem == null)
+                {
+                    res.SendErrorJson(StatusCode.NotFound, new ErrorResponse(new Exception("stale element reference")));
+                    return;
+                }
+                var val = elem.TagName();
+
+                res.SendJson(new JsonResponse<string>(_session.SessionId, "success", val));
+            }
+            catch (Exception e)
+            {
+                res.SendErrorJson(StatusCode.InternalServerError, new ErrorResponse(e));
+            }
+        }
+
         [Route(HttpMethod.POST, "/reboot")]
         public void RebootDevice(HttpRequest req, HttpResponse res)
         {
@@ -467,7 +548,7 @@ namespace SimpleWebDriver
                 }
 
                 elem.ScrollIntoView();                
-                if (!elem.VisibleOnScreen())
+                if (!elem.VisibleOnScreen() || !elem.Enabled)
                 {
                     res.SendErrorJson(StatusCode.BadRequest, new ErrorResponse(new Exception("element not interactable")));
                     return;

@@ -14,7 +14,7 @@ namespace SimpleWebDriver
         {
             if (e is WinceTextBox)
             {
-                return ((WinceTextBox)e).Text; ;
+                return ((WinceTextBox)e).Text;
             }
             else if (e is WinceLabel)
             {
@@ -23,6 +23,14 @@ namespace SimpleWebDriver
             else if (e is WinceButton)
             {
                 return ((WinceButton)e).Text;
+            }
+            else if (e is WinceCheckBox)
+            {
+                return ((WinceCheckBox)e).Text;
+            }
+            else if (e is WinceRadio)
+            {
+                return ((WinceRadio)e).Text;
             }
             return null;
         }

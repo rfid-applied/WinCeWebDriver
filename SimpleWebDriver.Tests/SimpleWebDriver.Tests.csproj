@@ -56,6 +56,7 @@
     <Compile Include="QueryTests.cs" />
     <Compile Include="SessionTests.cs" />
     <Compile Include="SimpleWebClient.cs" />
+    <Compile Include="StateTests.cs" />
     <Compile Include="WebDriver.cs" />
   </ItemGroup>
   <ItemGroup>

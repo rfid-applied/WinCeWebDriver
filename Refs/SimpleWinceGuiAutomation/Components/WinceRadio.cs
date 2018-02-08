@@ -15,7 +15,7 @@ namespace SimpleWinceGuiAutomation.Components
         public override string AttributeValue(string name)
         {
             return name == "type"? "radio" :
-                name == "checked"? Checked.ToString() :
+                name == "checked"? Checked.ToString().ToLower() :
                 null;
         }
 
