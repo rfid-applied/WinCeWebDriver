@@ -66,10 +66,13 @@ namespace CompactWebServer
         /// <param name="data">object data</param>
         public void SendJson(object data)
         {
-            //TODO: try to json encode and sent it to client
-            string json = JsonConvert.SerializeObject(data);
-            SendHeader("application/json", json.Length, StatusCode.OK);
-            SendToClient(json);
+            var settings = new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+            byte[] json = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data, Formatting.Indented, settings));
+            SendHeader("application/json; charset=utf-8", json.Length, StatusCode.OK);
+            SendToClient(json, json.Length);
             End();
         }
 
@@ -83,6 +86,20 @@ namespace CompactWebServer
             string page = GetErrorPage(statusCode, message);
             SendHeader("text/html", page.Length, statusCode);
             SendToClient(page);
+            End();
+        }
+
+        /// <summary>
+        /// Sends error JSON to the client
+        /// </summary>
+        /// <param name="statusCode">Status code</param>
+        /// <param name="message">Error message</param>
+        public void SendErrorJson(StatusCode statusCode, object data)
+        {
+            //TODO: try to json encode and sent it to client
+            byte[] json = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
+            SendHeader("application/json; charset=utf-8", json.Length, statusCode);
+            SendToClient(json, json.Length);
             End();
         }
 
@@ -167,6 +184,7 @@ namespace CompactWebServer
             header.Append(string.Format("Accept-Ranges: bytes\r\n"));
             header.Append(string.Format("Server: {0}\r\n", _app.Configuration.ServerName));
             header.Append(string.Format("Connection: close\r\n"));
+            header.Append(string.Format("Cache-Control: no-cache\r\n"));
             header.Append(string.Format("Content-Length: {0}\r\n", totalBytes));
 
             foreach (var h in this.Header)

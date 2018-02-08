@@ -106,6 +106,13 @@ namespace CompactWebServer
             set;
         }
 
+        // parameters extracted from the URL
+        public Dictionary<string, string> UrlParameters
+        {
+            get;
+            set;
+        }
+
         public Dictionary<string, string> QueryParameters
         {
             get;

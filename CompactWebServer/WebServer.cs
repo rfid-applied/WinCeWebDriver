@@ -183,7 +183,9 @@ namespace CompactWebServer
                     response.SendError(StatusCode.NotFound, "Page not found");
                 else
                 {
-                    MethodInfo webCtrl = this.Configuration.Router.Get(request.Method, request.Path);
+                    var parms = new Dictionary<string, string>();
+                    MethodInfo webCtrl = this.Configuration.Router.Get(request.Method, request.Path, parms);
+                    request.UrlParameters = parms;
 
                     ConstructorInfo ctor = webCtrl.DeclaringType.GetConstructor(new Type[]{});
 

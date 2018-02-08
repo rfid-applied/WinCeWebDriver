@@ -6,20 +6,15 @@ namespace CompactWebServer
 {
     public class WebRouter
     {
-        private Dictionary<string, MethodInfo> _routes = new Dictionary<string, MethodInfo>();
-
-        public Dictionary<string, MethodInfo> Routes
-        {
-            get { return _routes; }
-            set { _routes = value; }
-        }
+        MonoCross.Navigation.NavigationList _list = new MonoCross.Navigation.NavigationList();
 
         public void Add(HttpMethod method, string path, MethodInfo handler)
         {
-            string key = generateKey(method, path);
-
-            if (!this.Routes.ContainsKey(key))
-                this.Routes.Add(key, handler);
+            _list.Add(method, path, handler, null);
+        }
+        public void Add(HttpMethod method, string path, MethodInfo handler, Dictionary<string,string> parameters)
+        {
+            _list.Add(method, path, handler, parameters);
         }
 
         public void Add(string path, MethodInfo handler)
@@ -29,27 +24,17 @@ namespace CompactWebServer
 
         public bool Contain(HttpMethod method, string path)
         {
-            if (this.Routes.ContainsKey(generateKey(method, path)))
-                return true;
-
-            return this.Routes.ContainsKey(generateKey(HttpMethod.ANY, path));
+            var nx = _list.MatchUrl(method, path);
+            return (nx != null);
         }
 
-        public MethodInfo Get(HttpMethod method, string path)
+        public MethodInfo Get(HttpMethod method, string path, Dictionary<string,string> parameters)
         {
-            string key1 = generateKey(method, path);
-
-            if (this.Routes.ContainsKey(key1))
-                return this.Routes[key1];
-
-            string key2 = generateKey(HttpMethod.ANY, path);
-
-            return this.Routes.ContainsKey(key2) ? this.Routes[key2] : null;
-        }
-
-        private string generateKey(HttpMethod method, string path)
-        {
-            return method.ToString() + path.ToLower();
+            var nx = _list.MatchUrl(method, path);
+            if (nx == null)
+                throw new ArgumentException("path");
+            nx.ExtractParameters(path, parameters);
+            return nx.MethodInfo;
         }
     }
 }
