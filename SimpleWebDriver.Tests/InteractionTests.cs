@@ -13,6 +13,7 @@ namespace SimpleWebDriver.Tests
         public static void TestClick(string endpoint)
         {
             var wd = new WebDriver(endpoint);
+            wd.Session(SUT, null);
 
             var Bouton1 = wd.GetElement("link text", "Bouton1");
             var OtherButton = wd.GetElement("link text", "OtherButton");
@@ -25,6 +26,7 @@ namespace SimpleWebDriver.Tests
         public static void TestClickModalDlg(string endpoint)
         {
             var wd = new WebDriver(endpoint);
+            wd.Session(SUT, null);
 
             var btn = wd.GetElement("link text", "dlg");
 
@@ -41,6 +43,7 @@ namespace SimpleWebDriver.Tests
         public static void DisabledButtonClick(string endpoint)
         {
             var wd = new WebDriver(endpoint);
+            wd.Session(SUT, null);
 
             var Bouton1 = wd.GetElement("link text", "Bouton1");
 
@@ -49,15 +52,46 @@ namespace SimpleWebDriver.Tests
             Assertions.Equal("element not interactable", res["value"].Value<string>("error"));
         }
 
+        public static void TestClickComboBox(string endpoint)
+        {
+            var wd = new WebDriver(endpoint);
+            wd.Session(SUT, null);
+
+            var comboBox = wd.GetElement("css selector", "select");
+            Assertions.Equal(true, comboBox != null);
+            
+            var text = wd.ElementState(comboBox, "text");
+            Assertions.Equal("", text.Value<string>());
+
+            var items = wd.GetElements("css selector", "select > option").ToList();
+            Assertions.Equal(3, items.Count);
+
+            var texts = items.Select(handle => {
+                var txt = wd.ElementState(handle, "text");
+                return txt.Value<string>();
+            }).ToList();
+
+            Assertions.Equal("First", texts[0]);
+            Assertions.Equal("Second", texts[1]);
+            Assertions.Equal("Third", texts[2]);
+
+            wd.Click(items[0]);
+
+            var selected = wd.ElementState(items[0], "selected");
+            Assertions.Equal(true, selected.Value<bool>());
+        }
+
         public static void TestSelectItem(string endpoint)
         {
             // FIXME: how to select items webdriver-style?
+
             throw new NotImplementedException();
         }
 
         public static void TestCheckBox(string endpoint)
         {
             var wd = new WebDriver(endpoint);
+            wd.Session(SUT, null);
 
             var cb1 = wd.GetElement("link text", "My checkbox checked");
             Assertions.Equal(true, cb1 != null);
@@ -71,6 +105,8 @@ namespace SimpleWebDriver.Tests
         public static void TestRadioBox(string endpoint)
         {
             var wd = new WebDriver(endpoint);
+            wd.Session(SUT, null);
+
             var rb1 = wd.GetElement("link text", "First Radio");
             Assertions.Equal(true, rb1 != null);
 
@@ -89,6 +125,7 @@ namespace SimpleWebDriver.Tests
         public static void TestTextEntry(string endpoint)
         {
             var wd = new WebDriver(endpoint);
+            wd.Session(SUT, null);
 
             var tb1 = wd.GetElement("css selector", "input[type=\"text\"]");
             Assertions.Equal(true, tb1 != null);

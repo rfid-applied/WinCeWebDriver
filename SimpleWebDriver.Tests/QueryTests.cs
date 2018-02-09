@@ -86,5 +86,14 @@ namespace SimpleWebDriver.Tests
             var value = wd.GetElement("link text", "A label");
             Assertions.Equal(true, null != value);
         }
+
+        public static void TestReadAllComboBoxes(string endpoint)
+        {
+            var wd = new WebDriver(endpoint);
+            wd.Session(SUT, null);
+
+            var values = wd.GetElements("css selector", "select").ToList();
+            Assertions.Equal(2, values.Count);
+        }
     }
 }

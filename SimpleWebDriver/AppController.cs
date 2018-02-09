@@ -429,7 +429,14 @@ namespace SimpleWebDriver
                 {
                     val = ((SimpleWinceGuiAutomation.Components.WinceRadio)elem).Checked;
                 }
-                // TODO: if an <option>, see if it's checked
+                else if (elem is SimpleWinceGuiAutomation.Components.WinceComboBoxItem)
+                {
+                    val = ((SimpleWinceGuiAutomation.Components.WinceComboBoxItem)elem).Selected;
+                }
+                else if (elem is SimpleWinceGuiAutomation.Components.WinceListBoxItem)
+                {
+                    val = ((SimpleWinceGuiAutomation.Components.WinceListBoxItem)elem).Selected;
+                }
 
                 res.SendJson(new JsonResponse<bool>(_session.SessionId, "success", val));
             }
@@ -573,6 +580,14 @@ namespace SimpleWebDriver
                 else if (elem is SimpleWinceGuiAutomation.Components.WinceLabel)
                 {
                     ((SimpleWinceGuiAutomation.Components.WinceLabel)elem).Click();
+                }
+                else if (elem is SimpleWinceGuiAutomation.Components.WinceComboBoxItem)
+                {
+                    ((SimpleWinceGuiAutomation.Components.WinceComboBoxItem)elem).Click();
+                }
+                else if (elem is SimpleWinceGuiAutomation.Components.WinceListBoxItem)
+                {
+                    ((SimpleWinceGuiAutomation.Components.WinceListBoxItem)elem).Click();
                 }
 
                 res.SendJson(new JsonResponse<object>(_session.SessionId, "success", null));

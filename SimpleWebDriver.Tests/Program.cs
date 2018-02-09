@@ -10,8 +10,8 @@ namespace SimpleWebDriver.Tests
     {
         static void Main(string[] args)
         {
-            var address = args.Length > 1 ? args[1] : "192.168.0.3";
-            var port = args.Length > 2 ? args[1] : "8080";
+            var address = args.Length > 0 ? args[0] : "192.168.0.3";
+            var port = args.Length > 1 ? args[1] : "8080";
 
             Console.WriteLine("USAGE: tests.exe address port");
 

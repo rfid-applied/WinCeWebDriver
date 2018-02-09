@@ -13,7 +13,16 @@ namespace SimpleWinceGuiAutomation.Components
         private const int CB_GETLBTEXTLEN = 0x149;
         private const int CB_SETCURSEL = 0x014E;
 
-        public WinceComboBox(IntPtr ptr) : base(ptr) { }
+        public WinceComboBox(IntPtr ptr) : base(ptr)
+        {
+            var items = Items;
+
+            for (var i = 0; i < items.Count; i++)
+            {
+                var c = new WinceComboBoxItem(this, ptr);
+                Children.Add(c);
+            }
+        }
 
         public override string TagName()
         {
@@ -21,7 +30,7 @@ namespace SimpleWinceGuiAutomation.Components
         }
         public override string AttributeValue(string name)
         {
-            return null;
+            return name == "text" ? Text : null;
         }
 
         public String Text
@@ -69,6 +78,72 @@ namespace SimpleWinceGuiAutomation.Components
         public static bool Check(WinComponent c)
         {
             return c.Class.ToLower().Contains("combobox");
+        }
+    }
+
+    public class WinceComboBoxItem : WinceComponent
+    {
+        private const int CB_GETCOUNT = 0x0146;
+        private const int CB_GETLBTEXT = 0x0148;
+        private const int CB_GETLBTEXTLEN = 0x149;
+        private const int CB_SETCURSEL = 0x014E;
+
+        public WinceComboBoxItem(WinceComboBox cb, IntPtr handle)
+            : base(handle)
+        {
+            Parent = cb;
+        }
+
+        public override string ID
+        {
+            get {
+                var i = Parent.Children.IndexOf(this);
+                return ((long)Handle).ToString("X") + "-" + i.ToString("X");
+            }
+        }
+
+        public override string TagName()
+        {
+            return "option";
+        }
+
+        public String Text
+        {
+            get
+            {
+                var index = this.Parent.Children.IndexOf(this);
+
+                int size = PInvoke.SendMessage(Handle, CB_GETLBTEXTLEN, new IntPtr(index), new IntPtr(0)).ToInt32();
+                var ssb = new StringBuilder(size);
+                PInvoke.SendMessage(Handle, CB_GETLBTEXT, new IntPtr(index), ssb).ToInt32();
+                return ssb.ToString();
+            }
+        }
+
+        public bool Selected
+        {
+            get
+            {
+                var selectedText = WindowHelper.GetText(Handle);
+
+                return selectedText == Text;
+            }
+        }
+
+        // FIXME: this class will report parent's rectangle!
+
+        public void Click()
+        {
+            var i = this.Parent.Children.IndexOf(this);
+            PInvoke.SendMessage(Handle, CB_SETCURSEL, (IntPtr)i, (IntPtr)0);
+        }
+
+        public override string AttributeValue(string name)
+        {
+            return
+                name == "selected" ? Selected.ToString().ToLower() :
+                name == "text" ? Text :
+                null;
         }
     }
 }

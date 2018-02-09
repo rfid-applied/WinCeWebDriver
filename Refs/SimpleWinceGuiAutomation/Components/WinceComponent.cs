@@ -8,7 +8,7 @@ namespace SimpleWinceGuiAutomation.Components
     {
         protected IntPtr Handle { get; private set; }
 
-        public string ID { get { return ((long)Handle).ToString("X"); } }
+        public virtual string ID { get { return ((long)Handle).ToString("X"); } }
 
         protected WinceComponent(IntPtr handle)
         {
@@ -47,6 +47,7 @@ namespace SimpleWinceGuiAutomation.Components
         {
             return WindowHelper.ElementVisibleOnScreen(Handle);
         }
+
         public void ScrollIntoView()
         {
             WindowHelper.ScrollIntoView(Handle);

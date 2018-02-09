@@ -32,6 +32,18 @@ namespace SimpleWebDriver
             {
                 return ((WinceRadio)e).Text;
             }
+            else if (e is WinceComboBox)
+            {
+                return ((WinceComboBox)e).Text;
+            }
+            else if (e is WinceComboBoxItem)
+            {
+                return ((WinceComboBoxItem)e).Text;
+            }
+            else if (e is WinceListBoxItem)
+            {
+                return ((WinceListBoxItem)e).Text;
+            }
             return null;
         }
 

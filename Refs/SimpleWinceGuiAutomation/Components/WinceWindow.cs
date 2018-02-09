@@ -56,8 +56,25 @@ namespace SimpleWinceGuiAutomation.Components
 
         public IEnumerable<WinceComponent> ListElements(Func<WinceComponent,bool> pred)
         {
-            var res = new WinceComponentsFinder().ListChilds(handle);
-            return res.Select<WinComponent,WinceComponent>(FromWinComponent).Where(pred);
+            var root = Tree(handle);
+
+            var stack = new Stack<WinceComponent>();
+
+            stack.Push(root);
+            while (stack.Count > 0)
+            {
+                var node = stack.Pop();
+
+                if (pred(node))
+                {
+                    yield return node;
+                }
+
+                foreach (var child in node.Children)
+                    stack.Push(child);
+            }
+
+            yield break;
         }
 
         static WinceComponent FromWinComponent(WinComponent c)
@@ -118,9 +135,23 @@ namespace SimpleWinceGuiAutomation.Components
 
         public WinceComponent ElementByHandle(string id)
         {
-            var handle = (IntPtr)int.Parse(id, System.Globalization.NumberStyles.HexNumber);
-            var root = Tree(handle);
-            return root;
+            var ix = id.IndexOf('-');
+            if (ix >= 0)
+            {
+                var ident = id.Substring(0, ix);
+                var childnum = id.Substring(ix+1, id.Length - ix - 1);
+
+                var handle = (IntPtr)int.Parse(ident, System.Globalization.NumberStyles.HexNumber);
+                var root = Tree(handle);
+
+                return root.Children.First(c => c.ID == id);
+            }
+            else
+            {
+                var handle = (IntPtr)int.Parse(id, System.Globalization.NumberStyles.HexNumber);
+                var root = Tree(handle);
+                return root;
+            }
         }
 
         public WinceComponent Elements()
