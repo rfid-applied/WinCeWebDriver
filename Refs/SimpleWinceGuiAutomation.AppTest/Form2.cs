@@ -20,5 +20,15 @@ namespace SimpleWinceGuiAutomation.AppTest
         {
             this.Close();
         }
+
+        private void textBox1_GotFocus(object sender, EventArgs e)
+        {
+            this.inputPanel1.Enabled = true;
+        }
+
+        private void textBox1_LostFocus(object sender, EventArgs e)
+        {
+            this.inputPanel1.Enabled = false;
+        }
     }
 }

@@ -167,6 +167,9 @@ namespace SimpleWinceGuiAutomation.Wince
         [DllImport("coredll.dll", SetLastError=true)]
         public static extern ushort GetWindowThreadProcessId(IntPtr hWnd, ref IntPtr lpdwProcessId);
 
+        [DllImport("coredll.dll", EntryPoint = "FindWindowW", SetLastError = true)]
+        public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
         [DllImport("coredll.dll")]
         public static extern IntPtr GetDC(IntPtr hwnd);
 
@@ -280,5 +283,19 @@ namespace SimpleWinceGuiAutomation.Wince
             SimpleRegion = 0x2,
             ComplexRegion = 0x3
         }
+
+        #region SIP
+        // http://wiki.lazarus.freepascal.org/WinCE_Programming_Tips#Show.2FHide_SIP_Panel
+        public enum SIPF {
+          //some of consts already found in Windows
+          SIPF_OFF    =	0x00000000,
+          SIPF_ON     =	0x00000001,
+          SIPF_DOCKED =	0x00000002,
+          SIPF_LOCKED =	0x00000004
+        }
+ 
+        [DllImport("coredll.dll", EntryPoint="SipShowIM")]
+        public static extern int SipShowIM(SIPF IPStatus);
+        #endregion
     }
 }

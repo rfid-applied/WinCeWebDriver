@@ -590,6 +590,8 @@ namespace SimpleWebDriver
                     ((SimpleWinceGuiAutomation.Components.WinceListBoxItem)elem).Click();
                 }
 
+                SimpleWinceGuiAutomation.Wince.WindowHelper.SuppressSIP();
+
                 res.SendJson(new JsonResponse<object>(_session.SessionId, "success", null));
             }
             catch (Exception e)
@@ -638,6 +640,8 @@ namespace SimpleWebDriver
                 SimpleWinceGuiAutomation.Wince.WindowHelper.Focus((IntPtr)int.Parse(elem.ID, System.Globalization.NumberStyles.HexNumber));
                 OpenNETCF.Windows.Forms.SendKeys.Send(data.text);
 
+                SimpleWinceGuiAutomation.Wince.WindowHelper.SuppressSIP();
+
                 res.SendJson(new JsonResponse<object>(_session.SessionId, "success", null));
             }
             catch (Exception e)
@@ -685,6 +689,8 @@ namespace SimpleWebDriver
                     var e = ((SimpleWinceGuiAutomation.Components.WinceTextBox)elem);
                     e.Text = ""; // TODO: figure out how to use sendkeys instead???
                 }
+
+                SimpleWinceGuiAutomation.Wince.WindowHelper.SuppressSIP();
 
                 res.SendJson(new JsonResponse<object>(_session.SessionId, "success", null));
             }

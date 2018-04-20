@@ -136,5 +136,26 @@ namespace SimpleWebDriver.Tests
             var tb = wd.GetElement("link text", "HELLO");
             Assertions.Equal(tb1, tb);
         }
+
+        public static void TestSIP(string endpoint)
+        {
+            var wd = new WebDriver(endpoint);
+            wd.Session(SUT, null);
+
+            var btn = wd.GetElement("link text", "dlg");
+
+            wd.Click(btn);
+
+            var tb1 = wd.GetElement("css selector", "input[type=\"text\"]");
+            Assertions.Equal(true, tb1 != null);
+
+            // when we do this, the SIP is opened, which interferes
+            // with input
+            wd.Clear(tb1);
+            wd.SendKeys(tb1, "HELLO");
+
+            var tb = wd.GetElement("link text", "HELLO");
+            Assertions.Equal(tb1, tb);
+        }
     }
 }

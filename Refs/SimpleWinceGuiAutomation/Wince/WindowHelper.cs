@@ -243,5 +243,28 @@ namespace SimpleWinceGuiAutomation.Wince
             PInvoke.ReleaseDC(hWnd, hdc);
             return flag;
         }
+
+        public static void SuppressSIP()
+        {
+            var hWnd = PInvoke.FindWindow("SIPWndClass", null);
+            if (hWnd == IntPtr.Zero)
+                return;
+            var flags = (PInvoke.WindowStyles)PInvoke.GetWindowLong(hWnd, -16/*GWL_STYLE*/);
+            if ((flags & PInvoke.WindowStyles.WS_VISIBLE) == 0)
+                return; // not visible
+
+            var hWndButton = PInvoke.FindWindow("MS_SIPBUTTON", "MS_SIPBUTTON");
+            if (hWndButton == IntPtr.Zero)
+                return; // no button!
+
+            PInvoke.SipShowIM(PInvoke.SIPF.SIPF_OFF);
+            //Click(hWndButton, null);
+
+            flags = (PInvoke.WindowStyles)PInvoke.GetWindowLong(hWnd, -16/*GWL_STYLE*/);
+            if ((flags & PInvoke.WindowStyles.WS_VISIBLE) != 0)
+            {
+                Console.WriteLine("oops");
+            }
+        }
     }
 }
